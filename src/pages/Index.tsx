@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, ToggleLeft, ToggleRight, AlertCircle } from 'lucide-react';
+import { Loader2, ToggleLeft, ToggleRight, AlertCircle, Sun, Moon } from 'lucide-react';
 import type { WeatherData, GeoLocation, FavoriteCity, TemperatureUnit, WeatherTheme } from '@/types/weather';
-import { fetchWeather, reverseGeocode } from '@/lib/weather-api';
+import { fetchWeather, fetchAirQuality, reverseGeocode, type AQIResponse } from '@/lib/weather-api';
 import { getWeatherInfo } from '@/lib/weather-utils';
 import SearchBar from '@/components/weather/SearchBar';
 import CurrentWeather from '@/components/weather/CurrentWeather';
@@ -10,6 +10,9 @@ import HourlyForecast from '@/components/weather/HourlyForecast';
 import DailyForecast from '@/components/weather/DailyForecast';
 import FavoriteCities from '@/components/weather/FavoriteCities';
 import WeatherBackground from '@/components/weather/WeatherBackground';
+import WeatherMap from '@/components/weather/WeatherMap';
+import AirQuality from '@/components/weather/AirQuality';
+import TemperatureChart from '@/components/weather/TemperatureChart';
 
 function useLocalStorage<T>(key: string, initial: T): [T, (v: T | ((prev: T) => T)) => void] {
   const [value, setValue] = useState<T>(() => {
@@ -26,19 +29,29 @@ function useLocalStorage<T>(key: string, initial: T): [T, (v: T | ((prev: T) => 
 
 export default function Index() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [aqi, setAqi] = useState<AQIResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [unit, setUnit] = useLocalStorage<TemperatureUnit>('weather-unit', 'celsius');
   const [recentSearches, setRecentSearches] = useLocalStorage<GeoLocation[]>('weather-recent', []);
   const [favorites, setFavorites] = useLocalStorage<FavoriteCity[]>('weather-favorites', []);
   const [theme, setTheme] = useState<WeatherTheme>('default');
+  const [darkMode, setDarkMode] = useLocalStorage<boolean>('weather-dark', false);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+  }, [darkMode]);
 
   const loadWeather = useCallback(async (lat: number, lon: number, name?: string, country?: string) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchWeather(lat, lon, name, country);
+      const [data, aqiData] = await Promise.all([
+        fetchWeather(lat, lon, name, country),
+        fetchAirQuality(lat, lon).catch(() => null),
+      ]);
       setWeather(data);
+      setAqi(aqiData);
       const info = getWeatherInfo(data.current.weatherCode, data.current.isDay);
       setTheme(info.theme);
     } catch {
@@ -87,7 +100,6 @@ export default function Index() {
     });
   }, [setFavorites]);
 
-  // Auto-detect location on first load
   useEffect(() => {
     if (!weather) handleGetLocation();
   }, []);
@@ -101,18 +113,27 @@ export default function Index() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold weather-text">Weather</h1>
-            <button
-              onClick={toggleUnit}
-              className="glass-card px-3 py-1.5 flex items-center gap-2 hover:bg-white/20 transition-colors"
-            >
-              <span className={`text-sm font-semibold ${unit === 'celsius' ? 'weather-text' : 'weather-text-muted'}`}>°C</span>
-              {unit === 'celsius' ? (
-                <ToggleLeft className="w-5 h-5 weather-text" />
-              ) : (
-                <ToggleRight className="w-5 h-5 weather-text" />
-              )}
-              <span className={`text-sm font-semibold ${unit === 'fahrenheit' ? 'weather-text' : 'weather-text-muted'}`}>°F</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setDarkMode((prev: boolean) => !prev)}
+                className="glass-card p-2 hover:bg-white/20 transition-colors"
+                title="Toggle dark mode"
+              >
+                {darkMode ? <Sun className="w-4 h-4 weather-text" /> : <Moon className="w-4 h-4 weather-text" />}
+              </button>
+              <button
+                onClick={toggleUnit}
+                className="glass-card px-3 py-1.5 flex items-center gap-2 hover:bg-white/20 transition-colors"
+              >
+                <span className={`text-sm font-semibold ${unit === 'celsius' ? 'weather-text' : 'weather-text-muted'}`}>°C</span>
+                {unit === 'celsius' ? (
+                  <ToggleLeft className="w-5 h-5 weather-text" />
+                ) : (
+                  <ToggleRight className="w-5 h-5 weather-text" />
+                )}
+                <span className={`text-sm font-semibold ${unit === 'fahrenheit' ? 'weather-text' : 'weather-text-muted'}`}>°F</span>
+              </button>
+            </div>
           </div>
 
           {/* Search */}
@@ -171,7 +192,14 @@ export default function Index() {
               >
                 <CurrentWeather data={weather} unit={unit} />
                 <HourlyForecast data={weather.hourly} unit={unit} />
+                <TemperatureChart data={weather.hourly} unit={unit} />
                 <DailyForecast data={weather.daily} unit={unit} />
+                {aqi && <AirQuality data={aqi} />}
+                <WeatherMap
+                  latitude={weather.location.latitude}
+                  longitude={weather.location.longitude}
+                  cityName={weather.location.name}
+                />
               </motion.div>
             )}
           </AnimatePresence>

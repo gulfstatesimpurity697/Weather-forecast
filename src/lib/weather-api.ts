@@ -66,8 +66,29 @@ export async function fetchWeather(lat: number, lon: number, locationName?: stri
   };
 }
 
+export interface AQIResponse {
+  aqi: number;
+  pm25: number;
+  pm10: number;
+}
+
+export async function fetchAirQuality(lat: number, lon: number): Promise<AQIResponse> {
+  const params = new URLSearchParams({
+    latitude: lat.toString(),
+    longitude: lon.toString(),
+    current: 'european_aqi,pm2_5,pm10',
+  });
+  const res = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?${params}`);
+  if (!res.ok) throw new Error('Failed to fetch AQI');
+  const data = await res.json();
+  return {
+    aqi: data.current.european_aqi ?? 0,
+    pm25: data.current.pm2_5 ?? 0,
+    pm10: data.current.pm10 ?? 0,
+  };
+}
+
 export async function reverseGeocode(lat: number, lon: number): Promise<{ name: string; country: string }> {
-  // Open-Meteo doesn't have reverse geocoding, use a simple fallback
   const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10`);
   if (!res.ok) return { name: 'Current Location', country: '' };
   const data = await res.json();

